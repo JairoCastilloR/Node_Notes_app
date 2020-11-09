@@ -1,21 +1,234 @@
-CREATE DATABASE database_notes;
+﻿/*
+Created: 7/11/2020
+Modified: 7/11/2020
+Model: MySQL 5.7
+Database: MySQL 5.7
+*/
 
-USE database_notes;
+-- Create tables section -------------------------------------------------
 
-CREATE TABLE Students(
-    id INT(11) NOT NULL,
-    username VARCHAR(15) NOT NULL,
-    password VARCHAR(20) NOT NULL,
-    names VARCHAR(50) NOT NULL,
-    lastnames VARCHAR(50) NOT NULL,
-    DNI INT(99999999),
-    age SMALLINT(99),
+-- Table E1M_PERSONA
+CREATE DATABASE app_notas;
+
+USE app_notas;
 
 
-);
+CREATE TABLE `E1M_PERSONA`
+(
+  `PerCodDni` Char(8) NOT NULL,
+  `PerNom` Varchar(30),
+  `PerApe` Varchar(30)
+)
+;
 
-ALTER TABLE Students
-    ADD PRIMARY KEY(id);
+ALTER TABLE `E1M_PERSONA` ADD PRIMARY KEY (`PerCodDni`)
+;
 
-ALTER TABLE Students
-    MODIFY id INT(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT = 1;
+-- Table E1M_ROLES
+
+CREATE TABLE `E1M_ROLES`
+(
+  `RolNom` Varchar(20) NOT NULL,
+  `RolEstReg` Char(1) NOT NULL DEFAULT 'A'
+)
+;
+
+ALTER TABLE `E1M_ROLES` ADD PRIMARY KEY (`RolNom`)
+;
+
+-- Table E1P_ACTIVIDAD
+
+CREATE TABLE `E1P_ACTIVIDAD`
+(
+  `ActPerCodDni` Char(8) NOT NULL,
+  `ActRolNom` Varchar(20) NOT NULL,
+  `ActCarCod` Char(2) NOT NULL,
+  `ActEstReg` Char(1) NOT NULL DEFAULT 'A'
+)
+;
+
+CREATE INDEX `IX_Relationship1` ON `E1P_ACTIVIDAD` (`ActPerCodDni`)
+;
+
+-- Table E2M_CARRERA
+
+CREATE TABLE `E2M_CARRERA`
+(
+  `CarCod` Char(2) NOT NULL,
+  `CarNom` Varchar(30) NOT NULL,
+  `CarEstReg` Char(1) NOT NULL DEFAULT 'A'
+)
+;
+
+ALTER TABLE `E2M_CARRERA` ADD PRIMARY KEY (`CarCod`)
+;
+
+ALTER TABLE `E2M_CARRERA` ADD UNIQUE `CarNom` (`CarNom`)
+;
+
+-- Table E2M_MODULO
+
+CREATE TABLE `E2M_MODULO`
+(
+  `ModNom` Varchar(30) NOT NULL,
+  `ModCreTot` Tinyint UNSIGNED NOT NULL,
+  `ModHorTot` Tinyint NOT NULL,
+  `ModEstReg` Char(1) NOT NULL DEFAULT 'A'
+)
+;
+
+ALTER TABLE `E2M_MODULO` ADD PRIMARY KEY (`ModNom`)
+;
+
+-- Table E2P_ITINERARIO
+
+CREATE TABLE `E2P_ITINERARIO`
+(
+  `ItiCarCod` Char(2) NOT NULL,
+  `ItiModNom` Varchar(30) NOT NULL
+)
+;
+
+ALTER TABLE `E2P_ITINERARIO` ADD PRIMARY KEY (`ItiCarCod`,`ItiModNom`)
+;
+
+-- Table E2T_INGRESO
+
+CREATE TABLE `E2T_INGRESO`
+(
+  `IngCarCod` Char(2) NOT NULL,
+  `IngPerCodDni` Char(8) NOT NULL,
+  `IngCod` Char(6) NOT NULL,
+  `IngFecAni` Year(4) NOT NULL,
+  `IngEstReg` Char(1) NOT NULL
+)
+;
+
+CREATE INDEX `IX_Relationship10` ON `E2T_INGRESO` (`IngCarCod`)
+;
+
+CREATE INDEX `IX_Relationship11` ON `E2T_INGRESO` (`IngPerCodDni`)
+;
+
+ALTER TABLE `E2T_INGRESO` ADD PRIMARY KEY (`IngCod`)
+;
+
+-- Table E2M_UNIDADES
+
+CREATE TABLE `E2M_UNIDADES`
+(
+  `UniCod` Char(6) NOT NULL
+  COMMENT '170501
+17->El año en que entro en vigencia
+05->Numero de Modulo
+01->Orden en el Itinerario
+',
+  `UniNom` Char(20) NOT NULL,
+  `UniCre` Tinyint NOT NULL,
+  `UniSemCod` Char(2) NOT NULL,
+  `UniItiModNom` Varchar(30) NOT NULL,
+  `UniItiCarCod` Char(2) NOT NULL,
+  `UniHor` Tinyint NOT NULL,
+  `UniEstReg` Char(1) NOT NULL DEFAULT 'A'
+)
+;
+
+ALTER TABLE `E2M_UNIDADES` ADD PRIMARY KEY (`UniCod`,`UniNom`,`UniSemCod`,`UniCre`)
+;
+
+-- Table E2T_MATRICULA
+
+CREATE TABLE `E2T_MATRICULA`
+(
+  `MatIngCod` Char(6) NOT NULL,
+  `MatCarCod` Char(2) NOT NULL,
+  `MatCic` Char(1) NOT NULL
+  COMMENT 'Ciclo en cual es cursado, ejemplo(Semestre A,B)',
+  `MatFecAni` Year(4) NOT NULL,
+  `MatNroRec` Char(6) NOT NULL
+  COMMENT 'Numero de Recibo',
+  `MatMonPag` Decimal(2,2) NOT NULL,
+  `MatEstReg` Char(1) NOT NULL DEFAULT 'A'
+)
+;
+
+CREATE INDEX `IX_Relationship14` ON `E2T_MATRICULA` (`MatIngCod`)
+;
+
+ALTER TABLE `E2T_MATRICULA` ADD PRIMARY KEY (`MatIngCod`,`MatCarCod`)
+;
+
+-- Table E2M_SEMESTRE
+
+CREATE TABLE `E2M_SEMESTRE`
+(
+  `SemCod` Char(2) NOT NULL
+  COMMENT 'Ejemplo: I, II, III, IV, V, VI'
+)
+;
+
+ALTER TABLE `E2M_SEMESTRE` ADD PRIMARY KEY (`SemCod`)
+;
+
+-- Table E2T_ASIGNATURAS
+
+CREATE TABLE `E2T_ASIGNATURAS`
+(
+  `AsiMatIngCod` Char(6) NOT NULL,
+  `AsiMatCarCod` Char(2) NOT NULL,
+  `AsiUniNom` Char(20) NOT NULL,
+  `AsiUniCre` Tinyint NOT NULL,
+  `UniCod` Char(6) NOT NULL,
+  `UniSemCod` Char(2) NOT NULL,
+  `AsiGru` Char(1) NOT NULL
+  COMMENT 'Grupo de Matricula(A,B)'
+)
+;
+
+CREATE INDEX `IX_Relationship19` ON `E2T_ASIGNATURAS` (`UniCod`,`AsiUniNom`,`UniSemCod`,`AsiUniCre`)
+;
+
+ALTER TABLE `E2T_ASIGNATURAS` ADD PRIMARY KEY (`AsiMatIngCod`,`AsiMatCarCod`,`AsiUniNom`,`AsiUniCre`,`UniCod`,`UniSemCod`)
+;
+
+-- Create foreign keys (relationships) section -------------------------------------------------
+
+ALTER TABLE `E1P_ACTIVIDAD` ADD CONSTRAINT `Relationship1` FOREIGN KEY (`ActPerCodDni`) REFERENCES `E1M_PERSONA` (`PerCodDni`) ON DELETE RESTRICT ON UPDATE RESTRICT
+;
+
+ALTER TABLE `E1P_ACTIVIDAD` ADD CONSTRAINT `Relationship2` FOREIGN KEY (`ActRolNom`) REFERENCES `E1M_ROLES` (`RolNom`) ON DELETE RESTRICT ON UPDATE RESTRICT
+;
+
+ALTER TABLE `E2P_ITINERARIO` ADD CONSTRAINT `Relationship3` FOREIGN KEY (`ItiCarCod`) REFERENCES `E2M_CARRERA` (`CarCod`) ON DELETE RESTRICT ON UPDATE RESTRICT
+;
+
+ALTER TABLE `E2P_ITINERARIO` ADD CONSTRAINT `Relationship4` FOREIGN KEY (`ItiModNom`) REFERENCES `E2M_MODULO` (`ModNom`) ON DELETE RESTRICT ON UPDATE RESTRICT
+;
+
+ALTER TABLE `E1P_ACTIVIDAD` ADD CONSTRAINT `Relationship7` FOREIGN KEY (`ActCarCod`) REFERENCES `E2M_CARRERA` (`CarCod`) ON DELETE RESTRICT ON UPDATE RESTRICT
+;
+
+ALTER TABLE `E2T_INGRESO` ADD CONSTRAINT `Relationship10` FOREIGN KEY (`IngCarCod`) REFERENCES `E2M_CARRERA` (`CarCod`) ON DELETE RESTRICT ON UPDATE RESTRICT
+;
+
+ALTER TABLE `E2T_INGRESO` ADD CONSTRAINT `Relationship11` FOREIGN KEY (`IngPerCodDni`) REFERENCES `E1M_PERSONA` (`PerCodDni`) ON DELETE RESTRICT ON UPDATE RESTRICT
+;
+
+ALTER TABLE `E2M_UNIDADES` ADD CONSTRAINT `Relationship12` FOREIGN KEY (`UniItiCarCod`, `UniItiModNom`) REFERENCES `E2P_ITINERARIO` (`ItiCarCod`, `ItiModNom`) ON DELETE RESTRICT ON UPDATE RESTRICT
+;
+
+ALTER TABLE `E2T_MATRICULA` ADD CONSTRAINT `Relationship14` FOREIGN KEY (`MatIngCod`) REFERENCES `E2T_INGRESO` (`IngCod`) ON DELETE RESTRICT ON UPDATE RESTRICT
+;
+
+ALTER TABLE `E2M_UNIDADES` ADD CONSTRAINT `Relationship16` FOREIGN KEY (`UniSemCod`) REFERENCES `E2M_SEMESTRE` (`SemCod`) ON DELETE RESTRICT ON UPDATE RESTRICT
+;
+
+ALTER TABLE `E2T_MATRICULA` ADD CONSTRAINT `Relationship17` FOREIGN KEY (`MatCarCod`) REFERENCES `E2M_CARRERA` (`CarCod`) ON DELETE RESTRICT ON UPDATE RESTRICT
+;
+
+ALTER TABLE `E2T_ASIGNATURAS` ADD CONSTRAINT `Relationship18` FOREIGN KEY (`AsiMatIngCod`, `AsiMatCarCod`) REFERENCES `E2T_MATRICULA` (`MatIngCod`, `MatCarCod`) ON DELETE RESTRICT ON UPDATE RESTRICT
+;
+
+ALTER TABLE `E2T_ASIGNATURAS` ADD CONSTRAINT `Relationship19` FOREIGN KEY (`UniCod`, `AsiUniNom`, `UniSemCod`, `AsiUniCre`) REFERENCES `E2M_UNIDADES` (`UniCod`, `UniNom`, `UniSemCod`, `UniCre`) ON DELETE RESTRICT ON UPDATE RESTRICT
+;
+
